@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MovingActor.h"
@@ -23,57 +23,61 @@ AMovingActor::AMovingActor()
 	{
 		Mesh->SetMaterial(0, CroissantMaterial.Object);
 	}
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+
 	PrimaryActorTick.bCanEverTick = true;
 
+
 	SetActorScale3D(FVector(10.0f));
-
-
 	MovedPostion.Add(FVector(0.0f, 0.0f, 0.0f));
 	MovedPostion.Add(FVector(200.0f, 0.0f, 0.0f));
-	MP_Idx = 0;
+	MovedPostion.Add(FVector(0.0f, 200.0f, 0.0f));
+
+	MP_CurrentIdx = 0;
+
 }
 
 // Called when the game starts or when spawned
 void AMovingActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	SetActorLocation(MovedPostion[0]);
+
+	GetWorldTimerManager().SetTimer(StartMoveTimer, this, &AMovingActor::SwitchMovingAllow, MovingTime, true);
 }
 
 void AMovingActor::MoveActor(float DeltaTime)
 {
-	if (isRunMoving == false)
+	if(isAllowMoving != true)
 	{
-		MP_Idx = (MP_Idx + 1) % MovedPostion.Num();
-		isRunMoving = true;
+		return;
 	}
 
-	FVector vec = MovedPostion[MP_Idx] - GetActorLocation();
+	AddActorWorldOffset(VecDirection.GetSafeNormal() * DeltaTime * VecSpeed);
+}
 
-	AddActorWorldOffset(vec.GetSafeNormal() * DeltaTime * MoveSpeed);
+void AMovingActor::SwitchMovingAllow()
+{
+	//On or Off
+	isAllowMoving = !isAllowMoving;
 
-	UE_LOG(LogTemp, Log, TEXT("%f"), FVector::Dist(GetActorLocation(), MovedPostion[MP_Idx]));
-	if (FVector::Dist(GetActorLocation(), MovedPostion[MP_Idx]) <= 1.0f)
+	if (isAllowMoving)
 	{
-		isRunMoving = false;
+		MP_NextIdx = (MP_CurrentIdx + 1) % MovedPostion.Num();
+		isRunMoving = true;
+		VecDirection = MovedPostion[MP_NextIdx] - MovedPostion[MP_CurrentIdx];
+		UE_LOG(LogTemp, Log, TEXT("VecDirection : %s"), *VecDirection.ToString());
+		VecSpeed = VecDirection.Size() / MovingTime; // 속력 = 거리 / 시간
+		UE_LOG(LogTemp, Log, TEXT("VecSpeed : %f"), VecSpeed);
+
+		MP_CurrentIdx = MP_NextIdx;
 	}
 }
 
-// Called every frame
 void AMovingActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (isRunMoving == false && CheckTime < RestTime)
-	{
-		CheckTime += DeltaTime;
-	}
-	else
-	{
-		CheckTime = 0.0f;
-		MoveActor(DeltaTime);
-	}
+	MoveActor(DeltaTime);
 }
 

@@ -10,30 +10,48 @@ UCLASS()
 class PROJECT_6TH_API AMovingActor : public AActor
 {
 	GENERATED_BODY()
+
+private:
+	FVector VecDirection;
+	float VecSpeed;
+
+protected:
+	USceneComponent* Root;
+
+	UStaticMeshComponent* Mesh;
 	
 public:	
 	// Sets default values for this actor's properties
 	AMovingActor();
 	UPROPERTY(EditAnywhere, Category = "MovingStat")
 	TArray<FVector> MovedPostion;
-	float RestTime = 3.0f;
-	float CheckTime = 0.0f;
-	int32 MP_Idx;
 
 	UPROPERTY(EditAnywhere, Category = "MovingStat")
 	float MoveSpeed = 100.0f;
+
+	int32 MP_CurrentIdx;
+	int32 MP_NextIdx;
+
 	bool isRunMoving = false;
+	bool isAllowMoving = false;
+
+	UPROPERTY(EditAnywhere, Category = "MovingStat")
+	float MovingTime = 3.0f;
+
+	FTimerHandle StartMoveTimer;
+
+
+
+
 
 protected:
-	USceneComponent* Root;
-
-	UStaticMeshComponent* Mesh;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveActor(float);
 
+	void SwitchMovingAllow();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
