@@ -26,14 +26,15 @@ AMovingActor::AMovingActor()
 
 	PrimaryActorTick.bCanEverTick = true;
 
-
+	
 	SetActorScale3D(FVector(10.0f));
-	MovedPostion.Add(FVector(0.0f, 0.0f, 0.0f));
-	MovedPostion.Add(FVector(200.0f, 0.0f, 0.0f));
-	MovedPostion.Add(FVector(0.0f, 200.0f, 0.0f));
+	MovedPostion.Add(FVector(FMath::RandRange(-10, 10) * 100, FMath::RandRange(-10, 10) * 100, 0.0f));
+	MovedPostion.Add(FVector(FMath::RandRange(-10, 10) * 100, FMath::RandRange(-10, 10)* 100, 0.0f));
+	MovedPostion.Add(FVector(FMath::RandRange(-10, 10) * 100, FMath::RandRange(-10, 10)* 100, 0.0f));
+
+	SetActorLocation(MovedPostion[0]);
 
 	MP_CurrentIdx = 0;
-
 }
 
 // Called when the game starts or when spawned
